@@ -67,16 +67,16 @@ var getContent = function() {
 		end_flag = JSON.parse(ele_j)["attributes"]["class"];
         if (end_flag == "disabled") {
 			stopScript();
-		}
+		} else {
+            // 終了フラグが立たなければ、次の画面へ
+            this.thenClick('ul.pagination li a[onclick="pageChenge(\'1\')"]').then(function() {
+                this.waitForSelector("#main", getContent, stopScript);
+            });
+        }
 		// test
 		// if (count == 2) { stopScript(); }
 		
         count++;
-    });
-    
-    // 終了フラグが立たなければ、次の画面へ
-    this.thenClick('ul.pagination li a[onclick="pageChenge(\'1\')"]').then(function() {
-        this.waitForSelector("#main", getContent, stopScript);
     });
 };
 
