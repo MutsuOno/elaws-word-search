@@ -46,17 +46,8 @@ function readCSV(file) {
 }
 
 function writeXML(file, text) {
-    fs.open(file, 'a', function(err,fd){
-        if (err) {
-            console.log(err);
-            return;
-        }
-        fs.appendFile(fd, text, function(err, written, buffer){
-            if (err) {
-                console.log(err);
-            }
-            fs.close(fd);
-        });
+    fs.appendFile(file, text, function(err){
+        if (err) console.log(err);
     });
 }
 
