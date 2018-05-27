@@ -3,18 +3,8 @@
 const fs = require('fs');
 const request = require('sync-request');
 const sleep = require('sleep');
-const transform = require('camaro');
-const json2csv = require('json2csv').Parser;
-
-const template = {
-    data: ['//ApplData', {
-        lawName: 'lawName',
-        articleNum: 'Article',
-        content: ['//Article/Paragraph/ParagraphSentence',{
-            sentence: 'Sentence'
-        }]
-    }]
-}
+const cheerio = require('cheerio');
+const csv= require('csv-stringify');
 
 
 doTask();
@@ -23,8 +13,10 @@ doTask();
 function doTask() {
     var import_csv = 'list.csv';
     var export_csv = 'articles.csv'; 
+    var export_arr = [[]];
 
     var csv = readCSV(import_csv);
+
     for (var i = 0; i < csv.length; i++) {
         var law_name = csv[i][1];
         var law_num = csv[i][2];
@@ -34,25 +26,47 @@ function doTask() {
         var hourei = getHourei(law_num, article);
         var content_with_name = insertLawName(hourei, law_name);
     
-        const fields = ['lawName', 'articleNum', 'content'];
-        const result = transform(content_with_name, template);
-        var export_data = "";
-        if (i == 0) {
-            const json2csvParser = new json2csv({ fields, header: true });
-            export_data = json2csvParser.parse(result.data);
-        } else {
-            const json2csvParser = new json2csv({ fields, header: false });
-            export_data = json2csvParser.parse(result.data);
-            writeFile(export_csv, '\n');
-        }
+        var $ = cheerio.load(content_with_name, { xmlMode: true });
+        $("ApplData").each(function(i, el) {
+            var name = $(this).children("lawName").text(); // 法令名
+          
+            $("Article").each(function(i, el) {
+                var article = $(this).children("ArticleTitle").text(); // 条番号
+
+                if (article != "") {
+                    $("Paragraph").each(function(i, el) {
+                        var pNum = $(this).children("ParagraphNum").text(); // 項番号
+                        var content = $(this).children().nextAll().text().replace(/^\s+\n/gm,''); // 項以下をテキストで取得&空白行を削除
+    
+                        if (content != "" && content.indexOf('自転車') != -1) {
+                            // console.log(name + " : " + article+pNum + " : " + content);
+                            var arr = [content, name, article+pNum];
+                            export_arr.push(arr);
+                        }
+                    }); 
+                }
+            });
+        });
         
         sleep.sleep(5);
 
-        writeFile(export_csv, export_data);
-
     }
+
+    saveCSV(export_csv, export_arr);
+
 }
 
+
+function saveCSV(path, arr) {
+    const header = ['content', 'name', 'article'];
+    const rows = arr;
+  
+    csv([header,...rows], (_err, output) => {
+        fs.appendFile(path, output, function(err){
+            if (err) console.log(err);
+        });
+    })
+}
 
 function readCSV(file) {
     var csv = fs.readFileSync(file, 'utf8', function (err, text) {
