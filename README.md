@@ -7,6 +7,9 @@ elaws-word-search
 # 法令名,法令番号,条番号の取得 -> list.csv
 $ casperjs get-list.js 自転車
 
-# list.csvを元に条文の内容を取得 -> articles.xml
+# list.csvを元に条文の内容をxmlで取得 -> articles.xml
 $ node get-article.js
+
+# list.csvを元に条文の内容をcsvで取得(引数に指定した単語を含む項のみ出力. 指定しない場合はすべて出力) -> articles.csv
+$ node get-article2csv.js 自転車
 ```

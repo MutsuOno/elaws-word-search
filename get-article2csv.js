@@ -6,6 +6,8 @@ const sleep = require('sleep');
 const cheerio = require('cheerio');
 const csv= require('csv-stringify');
 
+const targetStr = process.argv[2];
+
 
 doTask();
 
@@ -37,11 +39,18 @@ function doTask() {
                     $("Paragraph").each(function(i, el) {
                         var pNum = $(this).children("ParagraphNum").text(); // 項番号
                         var content = $(this).children().nextAll().text().replace(/^\s+\n/gm,'').replace(/[ 　\t]/g, ""); // 項以下をテキストで取得&空白行とスペースを削除
-                        
-                        if (content != "" && content.indexOf('自転車') != -1) {
-                            // console.log(name + " : " + article+pNum + " : " + content);
-                            var arr = [content, name, article+pNum];
-                            export_arr.push(arr);
+
+                        // console.log(name + " : " + article+pNum + " : " + content);
+                        if (targetStr === undefined) { // すべて出力
+                            if (content != "") {
+                                var arr = [content, name, article+pNum];
+                                export_arr.push(arr);
+                            }
+                        } else { // 特定の単語を含む項のみ出力
+                            if (content != "" && content.indexOf(targetStr) != -1) {
+                                var arr = [content, name, article+pNum];
+                                export_arr.push(arr);
+                            }
                         }
                     }); 
                 }
