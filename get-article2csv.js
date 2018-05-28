@@ -13,7 +13,7 @@ doTask();
 function doTask() {
     var import_csv = 'list.csv';
     var export_csv = 'articles.csv'; 
-    var export_arr = [[]];
+    var export_arr = [];
 
     var csv = readCSV(import_csv);
 
@@ -36,8 +36,8 @@ function doTask() {
                 if (article != "") {
                     $("Paragraph").each(function(i, el) {
                         var pNum = $(this).children("ParagraphNum").text(); // 項番号
-                        var content = $(this).children().nextAll().text().replace(/^\s+\n/gm,''); // 項以下をテキストで取得&空白行を削除
-    
+                        var content = $(this).children().nextAll().text().replace(/^\s+\n/gm,'').replace(/[ 　\t]/g, ""); // 項以下をテキストで取得&空白行とスペースを削除
+                        
                         if (content != "" && content.indexOf('自転車') != -1) {
                             // console.log(name + " : " + article+pNum + " : " + content);
                             var arr = [content, name, article+pNum];
